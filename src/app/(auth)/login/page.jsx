@@ -17,6 +17,9 @@ import { FcGoogle } from "react-icons/fc";
 import { BookOpen } from "lucide-react";
 import { FaRegEnvelope } from "react-icons/fa6";
 import { TbLockPassword } from "react-icons/tb";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const {
@@ -30,15 +33,39 @@ export default function LoginPage() {
       password: "",
     },
   });
-
+  const router = useRouter();
   const onSubmit = async (data) => {
-    console.log(data);
-    // Your login logic
-    reset();
+    try {
+      const { error } = await authClient.signIn.email({
+        email: data.email,
+        password: data.password,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success("Login successful!");
+      reset();
+      router.push("/");
+    } catch (err) {
+      toast.error("Something went wrong.");
+      console.error(err);
+    }
   };
 
   const handleGoogleLogin = async () => {
-    // Google login
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Google sign in failed.");
+    }
   };
 
   return (
@@ -64,7 +91,7 @@ export default function LoginPage() {
           <Button
             fullWidth
             size="lg"
-            variant="flat"
+            variant="tertiary"
             radius="lg"
             onPress={handleGoogleLogin}
           >

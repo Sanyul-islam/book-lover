@@ -1,5 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import {
@@ -19,8 +23,12 @@ import { FcGoogle } from "react-icons/fc";
 import { BookOpen } from "lucide-react";
 import { FaRegEnvelope, FaRegUser, FaRegImage } from "react-icons/fa6";
 import { TbLockPassword } from "react-icons/tb";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function RegisterPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -35,34 +43,61 @@ export default function RegisterPage() {
       password: "",
       confirmPassword: "",
       photoUrl: "",
-      role: "user", // Default selection matching User (Reader)
+      role: "reader",
     },
   });
 
   const passwordValue = watch("password");
+  const currentRole = watch("role");
+  const router = useRouter();
 
   const onSubmit = async (data) => {
-    console.log("Registration Submitting Data:", data);
-    // Add your signup API endpoints here
-    reset();
+    try {
+      const { error } = await authClient.signUp.email({
+        name: data.fullName,
+        email: data.email,
+        password: data.password,
+        image: data.photoUrl || "",
+        role: data.role,
+        callbackURL: "/",
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      toast.success("Registration successful!");
+      reset();
+      router.push("/");
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   const handleGoogleSignup = async () => {
-    // Google registration action
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Google sign up failed.");
+    }
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-default-50 to-default-100 px-4 py-12">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-default-50 to-default-100 px-4 py-12">
       <Card className="w-full max-w-md rounded-2xl shadow-2xl border border-default-200">
         <div className="p-8">
-          {/* Logo */}
           <div className="flex justify-center mb-1">
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
               <BookOpen className="text-primary" size={30} />
             </div>
           </div>
 
-          {/* Heading */}
           <div className="text-center space-y-2 mb-8">
             <h1 className="text-3xl font-bold">Create Account</h1>
             <p className="text-default-500">
@@ -70,7 +105,6 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* Google Button */}
           <Button
             fullWidth
             size="lg"
@@ -81,7 +115,6 @@ export default function RegisterPage() {
             <FcGoogle size={22} /> Continue with Google
           </Button>
 
-          {/* Divider */}
           <div className="flex items-center w-full my-4">
             <Separator className="flex-1" />
             <span className="px-3 text-xs font-semibold text-default-400">
@@ -90,12 +123,10 @@ export default function RegisterPage() {
             <Separator className="flex-1" />
           </div>
 
-          {/* Form */}
           <Form
             onSubmit={handleSubmit(onSubmit)}
             className="w-full flex flex-col gap-4"
           >
-            {/* Full Name Field */}
             <TextField
               isInvalid={!!errors.fullName}
               className="flex flex-col gap-1"
@@ -121,7 +152,6 @@ export default function RegisterPage() {
               </FieldError>
             </TextField>
 
-            {/* Email Field */}
             <TextField
               isInvalid={!!errors.email}
               className="flex flex-col gap-1"
@@ -145,7 +175,6 @@ export default function RegisterPage() {
               </FieldError>
             </TextField>
 
-            {/* Photo URL Field */}
             <TextField
               isInvalid={!!errors.photoUrl}
               className="flex flex-col gap-1"
@@ -171,7 +200,6 @@ export default function RegisterPage() {
               </FieldError>
             </TextField>
 
-            {/* Password Field */}
             <TextField
               isInvalid={!!errors.password}
               className="flex flex-col gap-1"
@@ -187,21 +215,33 @@ export default function RegisterPage() {
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
-                      value: 6,
-                      message: "Password must be at least 6 characters",
+                      value: 8,
+                      message: "Password must be at least 8 characters",
                     },
                   })}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
                   className="w-full px-1 py-1.5 outline-none bg-transparent text-sm"
                 />
+                <InputGroup.Suffix>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="focus:outline-none text-default-400 hover:text-default-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff className="size-4" />
+                    ) : (
+                      <FiEye className="size-4" />
+                    )}
+                  </button>
+                </InputGroup.Suffix>
               </InputGroup>
               <FieldError className="text-xs text-danger">
                 {errors.password?.message}
               </FieldError>
             </TextField>
 
-            {/* Confirm Password Field */}
             <TextField
               isInvalid={!!errors.confirmPassword}
               className="flex flex-col gap-1"
@@ -216,84 +256,82 @@ export default function RegisterPage() {
                 <Input
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
+                    minLength: {
+                      value: 8,
+                      message: "Password must be at least 8 characters",
+                    },
                     validate: (value) =>
                       value === passwordValue || "Passwords do not match",
                   })}
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   className="w-full px-1 py-1.5 outline-none bg-transparent text-sm"
                 />
+                <InputGroup.Suffix>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="focus:outline-none text-default-400 hover:text-default-600 transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <FiEyeOff className="size-4" />
+                    ) : (
+                      <FiEye className="size-4" />
+                    )}
+                  </button>
+                </InputGroup.Suffix>
               </InputGroup>
               <FieldError className="text-xs text-danger">
                 {errors.confirmPassword?.message}
               </FieldError>
             </TextField>
 
-            
-            {/* Role Selection Radio Group */}
             <RadioGroup
-              defaultValue="user"
+              value={currentRole}
               orientation="horizontal"
-              className="flex flex-col gap-2 mt-2"
-              onValueChange={(value) => setValue("role", value)}
+              className="flex flex-col gap-2 mt-4"
+              onChange={(value) => setValue("role", value)}
             >
               <Label className="text-sm font-medium text-default-700">
                 Select Your Role
               </Label>
-
-              <div className="flex gap-6">
-                {/* Reader Option */}
-                <Radio value="user">
-                  <Radio.Content className="flex items-center gap-2 cursor-pointer">
-                    <Radio.Control className="w-4 h-4 rounded-full border border-purple-500 flex items-center justify-center data-[selected=true]:border-primary transition-colors">
-                      <Radio.Indicator  />
-                    </Radio.Control>
-                    <span className="text-sm text-default-700 select-none">
-                     Reader
-                    </span>
-                  </Radio.Content>
-                </Radio>
-
-                {/* Librarian Option */}
-                <Radio value="librarian">
-                  <Radio.Content className="flex items-center gap-2 cursor-pointer bg">
-                    <Radio.Control className="w-4 h-4 rounded-full border border-purple-500 flex items-center justify-center data-[selected=true]:border-primary transition-colors">
-                      <Radio.Indicator />
-                    </Radio.Control>
-                    <span className="text-sm text-default-700 select-none">
-                      Librarian
-                    </span>
-                  </Radio.Content>
-                </Radio>
+              <div className="flex gap-4 mt-2">
+              <Radio value="reader">
+                <Radio.Content className="flex items-center gap-2 cursor-pointer group">
+                  <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
+                    <Radio.Indicator  />
+                  </Radio.Control>
+                  Reader
+                </Radio.Content>
+              </Radio>
+              <Radio value="librarian">
+                <Radio.Content className="flex items-center gap-2 cursor-pointer group">
+                  <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
+                    <Radio.Indicator  />
+                  </Radio.Control>
+                  Librarian
+                </Radio.Content>
+              </Radio>
               </div>
             </RadioGroup>
 
-            {/* Submit Button */}
             <Button
               type="submit"
-              color="primary"
-              size="lg"
-              radius="lg"
-              fullWidth
-              isLoading={isSubmitting}
-              className="mt-4"
+              className="w-full bg-primary text-white font-medium py-2 hover:bg-primary-600 transition-colors mt-4"
             >
               Register
             </Button>
-          </Form>
 
-          {/* Navigation link */}
-          <p className="text-center text-default-500 mt-8">
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="font-semibold text-primary hover:underline"
-            >
-              Login Now
-            </Link>
-          </p>
+            <div className="text-center text-sm text-default-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-500 hover:underline">
+                Login Now
+              </Link>
+            </div>
+          </Form>
         </div>
       </Card>
     </main>
   );
 }
+  
