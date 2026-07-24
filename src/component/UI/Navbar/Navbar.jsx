@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Dropdown, Avatar, Label } from "@heroui/react";
+import { Dropdown, Avatar, Label, Button } from "@heroui/react";
 import { BookOpen, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -135,9 +135,9 @@ export default function NavbarComponent() {
             {!session ? (
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
+                
               >
-                Login
+                <Button>Login</Button>
               </Link>
             ) : (
               <Dropdown>
