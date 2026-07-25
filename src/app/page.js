@@ -1,4 +1,5 @@
 import Carousel from "@/component/UI/Banner/Slider";
+import FeaturedBooks from "@/component/UI/Body/FeaturedBooks";
 import PopularCategories from "@/component/UI/Body/PopularCategories";
 import TopLibrarians from "@/component/UI/Body/TopLibrarians";
 import Footer from "@/component/UI/Footer/Footer";
@@ -10,6 +11,7 @@ export default function Home() {
     <>
     <NavbarComponent/>
     <Carousel/>
+    <FeaturedBooks/>
     <PopularCategories/>
     <TopLibrarians/>
     <Footer/>
