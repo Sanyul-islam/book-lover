@@ -20,6 +20,7 @@ import { TbLockPassword } from "react-icons/tb";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 export default function LoginPage() {
   const {
@@ -74,8 +75,14 @@ export default function LoginPage() {
         <div className="p-8">
           {/* Logo */}
           <div className="flex justify-center mb-1">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <BookOpen className="text-primary" size={30} />
+            <div className="w-56 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              {/* <BookOpen className="text-primary" size={30} /> */}
+              <Image
+                width={440}
+                height={440}
+                src="/navbar-logo.png"
+                alt="Book Lover Logo"
+              />
             </div>
           </div>
 
@@ -184,7 +191,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
-              className="font-semibold text-primary hover:underline"
+              className="font-semibold text-sky-500 hover:underline"
             >
               Register Now
             </Link>

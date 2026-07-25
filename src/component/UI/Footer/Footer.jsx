@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button, Separator, Input } from "@heroui/react";
 
-import { FaBookOpen, FaFacebook, FaGithub, FaInstagram, FaXTwitter } from "react-icons/fa6";
+import { FaFacebook, FaGithub, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
 
 export default function Footer() {
@@ -15,8 +15,8 @@ export default function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                className="text-primary"
-                width={150}
+                className="text-primary h-auto w-auto"
+                width={180}
                 height={50}
                 src="/navbar-logo.png"
                 alt="Book Lover Logo"

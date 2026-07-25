@@ -24,6 +24,7 @@ import { BookOpen } from "lucide-react";
 import { FaRegEnvelope, FaRegUser, FaRegImage } from "react-icons/fa6";
 import { TbLockPassword } from "react-icons/tb";
 import { FiEye, FiEyeOff } from "react-icons/fi";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -89,12 +90,18 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-default-50 to-default-100 px-4 py-12">
+    <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-default-50 to-default-100 px-4 py-12">
       <Card className="w-full max-w-md rounded-2xl shadow-2xl border border-default-200">
         <div className="p-8">
           <div className="flex justify-center mb-1">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <BookOpen className="text-primary" size={30} />
+            <div className="w-56 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              {/* <BookOpen className="text-primary" size={30} /> */}
+              <Image
+                width={440}
+                height={440}
+                src="/navbar-logo.png"
+                alt="Book Lover Logo"
+              />
             </div>
           </div>
 
@@ -296,22 +303,22 @@ export default function RegisterPage() {
                 Select Your Role
               </Label>
               <div className="flex gap-4 mt-2">
-              <Radio value="reader">
-                <Radio.Content className="flex items-center gap-2 cursor-pointer group">
-                  <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
-                    <Radio.Indicator  />
-                  </Radio.Control>
-                  Reader
-                </Radio.Content>
-              </Radio>
-              <Radio value="librarian">
-                <Radio.Content className="flex items-center gap-2 cursor-pointer group">
-                  <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
-                    <Radio.Indicator  />
-                  </Radio.Control>
-                  Librarian
-                </Radio.Content>
-              </Radio>
+                <Radio value="reader">
+                  <Radio.Content className="flex items-center gap-2 cursor-pointer group">
+                    <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
+                      <Radio.Indicator />
+                    </Radio.Control>
+                    Reader
+                  </Radio.Content>
+                </Radio>
+                <Radio value="librarian">
+                  <Radio.Content className="flex items-center gap-2 cursor-pointer group">
+                    <Radio.Control className="w-4 h-4 rounded-full border-2 border-blue-500 group-data-[selected=true]:border-primary flex items-center justify-center transition-colors">
+                      <Radio.Indicator />
+                    </Radio.Control>
+                    Librarian
+                  </Radio.Content>
+                </Radio>
               </div>
             </RadioGroup>
 
@@ -324,7 +331,7 @@ export default function RegisterPage() {
 
             <div className="text-center text-sm text-default-600">
               Already have an account?{" "}
-              <Link href="/login" className="text-blue-500 hover:underline">
+              <Link href="/login" className="font-semibold text-sky-500 hover:underline">
                 Login Now
               </Link>
             </div>
@@ -334,4 +341,3 @@ export default function RegisterPage() {
     </main>
   );
 }
-  

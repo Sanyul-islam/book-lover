@@ -51,11 +51,11 @@ export default function NavbarComponent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="items-center gap-8 hidden md:flex">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center h-auto w-auto gap-2">
               <Image
-                className="text-primary"
-                width={228}
-                height={228}
+                className="text-primary h-auto w-auto mt-2"
+                width={180}
+                height={80}
                 src="/navbar-logo.png"
                 alt="Book Lover Logo"
               />
@@ -122,9 +122,9 @@ export default function NavbarComponent() {
           <div className="flex items-center gap-8 md:hidden">
             <Link href="/" className="flex items-center gap-2">
               <Image
-                className="text-primary"
-                width={228}
-                height={228}
+                className="text-primary h-auto w-auto mt-2.5"
+                width={180}
+                height={80}
                 src="/navbar-logo.png"
                 alt="Book Lover Logo"
               />
@@ -133,10 +133,7 @@ export default function NavbarComponent() {
 
           <div className="flex items-center">
             {!session ? (
-              <Link
-                href="/login"
-                
-              >
+              <Link href="/login">
                 <Button>Login</Button>
               </Link>
             ) : (

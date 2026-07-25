@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip, Separator } from "@heroui/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCards, Navigation, Pagination, Autoplay } from "swiper/modules";
 
@@ -137,7 +137,7 @@ export default function HomeBannerSwiper() {
                 <Image
                   src={book.image}
                   alt={book.title}
-                  size="100%"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   fill
                   className="object-cover"
                 />
@@ -162,6 +162,7 @@ export default function HomeBannerSwiper() {
           ))}
         </Swiper>
       </div>
+      <Separator className="mt-5 border-default-200" />
     </section>
   );
 }
