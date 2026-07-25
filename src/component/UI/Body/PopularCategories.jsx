@@ -11,6 +11,7 @@ import {
   Globe,
   Sparkles,
   ScrollText,
+  Library,
 } from "lucide-react";
 
 const categories = [
@@ -62,6 +63,7 @@ export default function PopularCategories() {
       {/* Heading */}
       <div className="text-center mb-10">
         <Chip className="rounded-full px-4 py-2 font-semibold text-sm" color="primary" variant="flat">
+         <Library size={20} />
           <h2>Categories</h2>
         </Chip>
 

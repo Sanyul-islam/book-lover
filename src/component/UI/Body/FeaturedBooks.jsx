@@ -1,7 +1,7 @@
 import getBooks from "@/lib/server";
 import BookCard from "./BookCard";
 import { Chip } from "@heroui/react";
-
+import { Sparkles } from "lucide-react";
 
 export default async function FeaturedBooks() {
   const books = await getBooks();
@@ -11,9 +11,14 @@ export default async function FeaturedBooks() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
       <div className="text-center mb-10">
-        <Chip className="rounded-full px-4 py-2 font-semibold text-sm" color="primary" variant="flat">
-                  <h2>Featured</h2>
-                </Chip>
+        <Chip
+          className="rounded-full px-4 py-2 font-semibold text-sm mb-4"
+          color="primary"
+          variant="flat"
+        >
+        <Sparkles size={20} />
+          <h2>Featured</h2>
+        </Chip>
         <h2 className="text-3xl font-bold">Featured Books</h2>
         <p className="text-default-500 mt-2">
           Explore our latest collection of books.
