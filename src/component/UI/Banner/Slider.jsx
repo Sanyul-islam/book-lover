@@ -9,79 +9,9 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import getBooks from "@/lib/server";
 
-const books = [
-  {
-    id: 1,
-    title: "Atomic Habits",
-    author: "James Clear",
-    image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-    category: "Self Growth",
-  },
-  {
-    id: 2,
-    title: "The Silent Library",
-    author: "Emma Watson",
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
-    category: "Fantasy",
-  },
-  {
-    id: 3,
-    title: "The Alchemist",
-    author: "Paulo Coelho",
-    image: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800",
-    category: "Adventure",
-  },
-  {
-    id: 4,
-    title: "Think Like a Monk",
-    author: "Jay Shetty",
-    image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800",
-    category: "Motivation",
-  },
-  {
-    id: 5,
-    title: "Rich Dad Poor Dad",
-    author: "Robert T. Kiyosaki",
-    image: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=800",
-    category: "Finance",
-  },
-  {
-    id: 6,
-    title: "The Psychology of Money",
-    author: "Morgan Housel",
-    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=800",
-    category: "Business",
-  },
-  {
-    id: 7,
-    title: "Harry Potter",
-    author: "J. K. Rowling",
-    image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=800",
-    category: "Fantasy",
-  },
-  {
-    id: 8,
-    title: "Deep Work",
-    author: "Cal Newport",
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800",
-    category: "Productivity",
-  },
-  {
-    id: 9,
-    title: "The Hobbit",
-    author: "J. R. R. Tolkien",
-    image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800",
-    category: "Adventure",
-  },
-  {
-    id: 10,
-    title: "To Kill a Mockingbird",
-    author: "Harper Lee",
-    image: "https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=800",
-    category: "Classic",
-  },
-];
+const books = await getBooks();
 
 export default function HomeBannerSwiper() {
   return (

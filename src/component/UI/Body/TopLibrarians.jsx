@@ -30,7 +30,7 @@ export default function TopLibrarians() {
     <section className="max-w-7xl mx-auto px-4 py-12">
       {/* Heading */}
       <div className="text-center mb-8">
-        <Chip color="primary" variant="flat" radius="full">
+        <Chip className="rounded-full px-4 py-2 font-semibold text-sm" color="primary" variant="flat">
           <Trophy size={14} /> Top Providers
         </Chip>
 
