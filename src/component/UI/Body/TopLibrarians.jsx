@@ -30,7 +30,11 @@ export default function TopLibrarians() {
     <section className="max-w-7xl mx-auto px-4 py-12">
       {/* Heading */}
       <div className="text-center mb-8">
-        <Chip className="rounded-full px-4 py-2 font-semibold text-sm" color="primary" variant="flat">
+        <Chip
+          className="rounded-full px-4 py-2 font-semibold text-sm"
+          color="primary"
+          variant="flat"
+        >
           <Trophy size={14} /> Top Providers
         </Chip>
 
@@ -46,15 +50,18 @@ export default function TopLibrarians() {
         {librarians.map((librarian) => (
           <Card
             key={librarian.id}
-            className="w-56 rounded-xl border border-default-200 shadow-xl hover:shadow-md transition-all duration-300"
+            className="w-56 rounded-xl border border-default-200 shadow-xl hover:shadow-md transition-all duration-300 overflow-hidden"
           >
-            <Image
-              src={librarian.avatar}
-              alt={librarian.name}
-              width={224}
-              height={224}
-              className="w-full h-56 object-cover rounded-md"
-            />
+            <div className="relative w-full h-56">
+              <Image
+                src={librarian.avatar}
+                alt={librarian.name}
+                fill
+                className="object-cover rounded-md"
+                sizes="224px"
+              />
+            </div>
+
             <Card.Content className="flex flex-col items-center gap-3 p-5">
               <div className="text-center">
                 <h3 className="text-base font-semibold">{librarian.name}</h3>
