@@ -84,7 +84,7 @@ export default function Footer() {
                 isIconOnly
                 variant="flat"
                 radius="full"
-                className="transition-all duration-300 hover:bg-primary hover:text-black hover:-translate-y-1"
+                className="transition-all duration-300 hover:bg-primary hover:text-sky-500 hover:-translate-y-1"
               >
                 <FaFacebook size={20} />
               </Button>
@@ -93,7 +93,7 @@ export default function Footer() {
                 isIconOnly
                 variant="flat"
                 radius="full"
-                className="transition-all duration-300 hover:bg-primary hover:text-black hover:-translate-y-1"
+                className="transition-all duration-300 hover:bg-primary hover:text-sky-500 hover:-translate-y-1"
               >
                 <FaInstagram size={20} />
               </Button>
@@ -102,7 +102,7 @@ export default function Footer() {
                 isIconOnly
                 variant="flat"
                 radius="full"
-                className="transition-all duration-300 hover:bg-primary hover:text-black hover:-translate-y-1"
+                className="transition-all duration-300 hover:bg-primary hover:text-sky-500 hover:-translate-y-1"
               >
                 <FaXTwitter size={18} />
               </Button>
@@ -111,7 +111,7 @@ export default function Footer() {
                 isIconOnly
                 variant="flat"
                 radius="full"
-                className="transition-all duration-300 hover:bg-primary hover:text-black hover:-translate-y-1"
+                className="transition-all duration-300 hover:bg-primary hover:text-sky-500 hover:-translate-y-1"
               >
                 <FaGithub size={40} />
               </Button>

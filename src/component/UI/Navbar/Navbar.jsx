@@ -8,6 +8,7 @@ import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { ThemeSwitch } from "../ThemeSwitch/ThemeSwitch";
 
 export default function NavbarComponent() {
   const pathname = usePathname();
@@ -131,7 +132,8 @@ export default function NavbarComponent() {
             </Link>
           </div>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
+            <ThemeSwitch />
             {!session ? (
               <Link href="/login">
                 <Button>Login</Button>
@@ -233,7 +235,7 @@ export default function NavbarComponent() {
               </div>
             </div>
           )}
-
+          
           <div className="pt-4 border-t border-default-100">
             {!session ? (
               <Link

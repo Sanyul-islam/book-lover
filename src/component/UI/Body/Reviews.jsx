@@ -2,6 +2,7 @@
 
 import { Card, Chip, Avatar } from "@heroui/react";
 import { MessageCircleHeart, Star } from "lucide-react";
+import Marquee from "react-fast-marquee";
 
 const reviews = [
   {
@@ -65,47 +66,55 @@ export default function Reviews() {
       </div>
 
       {/* Reviews Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <Marquee
+        gradient
+        speed={50}
+        Direction="left"
+        pauseOnHover={false}
+        pauseOnClick={true}
+        className="overflow-hidden"
+      >
         {reviews.map((item) => (
-          <Card
-            key={item.name}
-            className="p-6 border border-default-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-          >
-            {/* User */}
-            <div className="flex items-center gap-4 mb-5 pb-5 border-b border-default-200">
-              <Avatar>
-                <Avatar.Image
-                  src={item.image}
-                  name={item.name}
-                  size="lg"
-                  className="ring-2 ring-primary/20"
-                />
-              </Avatar>
+          <div key={item.name} className="grid grid-rows-1 gap-6 mx-5">
+            <Card
+              className="p-6 border border-default-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
+            >
+              {/* User */}
+              <div className="flex items-center gap-4 mb-5 pb-5 border-b border-default-200">
+                <Avatar>
+                  <Avatar.Image
+                    src={item.image}
+                    name={item.name}
+                    size="lg"
+                    className="ring-2 ring-primary/20"
+                  />
+                </Avatar>
 
-              <div>
-                <h3 className="font-semibold text-base">{item.name}</h3>
+                <div>
+                  <h3 className="font-semibold text-base">{item.name}</h3>
 
-                <p className="text-sm text-default-500">{item.role}</p>
+                  <p className="text-sm text-default-500">{item.role}</p>
+                </div>
               </div>
-            </div>
-            {/* Rating */}
-            <div className="flex items-center gap-1 mb-5">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <Star
-                  key={index}
-                  size={18}
-                  className="fill-warning text-warning"
-                />
-              ))}
-            </div>
+              {/* Rating */}
+              <div className="flex items-center gap-1 mb-5">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <Star
+                    key={index}
+                    size={18}
+                    className="fill-warning text-warning"
+                  />
+                ))}
+              </div>
 
-            {/* Review */}
-            <p className="text-default-600 leading-7 italic flex-1">
-              &quot;{item.review}&quot;
-            </p>
-          </Card>
+              {/* Review */}
+              <p className="text-default-600 leading-7 italic flex-1">
+                &quot;{item.review}&quot;
+              </p>
+            </Card>
+          </div>
         ))}
-      </div>
+      </Marquee>
     </section>
   );
 }
