@@ -47,14 +47,16 @@ export default function BookCard({ book }) {
       </Card.Content>
 
       <Card.Footer className="px-5 pb-5">
-        <Button
-          as={Link}
+        <Link
           href={`/books/${_id}`}
+        >
+        <Button
           color="primary"
           className="w-full"
         >
           View Details
         </Button>
+        </Link>
       </Card.Footer>
     </Card>
   );

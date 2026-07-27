@@ -9,7 +9,8 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import getBooks from "@/lib/server";
+import {getBooks} from "@/lib/server";
+import Link from "next/link";
 
 const books = await getBooks();
 
@@ -47,7 +48,6 @@ export default function HomeBannerSwiper() {
         <Swiper
           effect="cards"
           grabCursor
-          
           pagination={{
             dynamicBullets: true,
           }}
@@ -82,10 +82,11 @@ export default function HomeBannerSwiper() {
                   <h2 className="text-2xl font-bold">{book.title}</h2>
 
                   <p className="text-white/80">{book.author}</p>
-
-                  <Button color="primary" radius="full" size="sm">
-                    Read Details
-                  </Button>
+                  <Link href={`/books/${book._id}`}>
+                    <Button color="primary" radius="full" size="sm">
+                      Read Details
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </SwiperSlide>

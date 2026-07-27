@@ -1,0 +1,415 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import NextLink from "next/link";
+import { Card, Chip, Skeleton, Button } from "@heroui/react";
+import {
+  User,
+  CalendarDays,
+  Truck,
+  Pencil,
+  Trash2,
+  EyeOff,
+  Star,
+  MessageSquareText,
+  Loader2,
+} from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "react-toastify";
+import {getBook} from "@/lib/server";
+import {getBookReviews} from "@/lib/server";
+
+const STATUS_STYLES = {
+  Available: { color: "success", label: "Available" },
+  "Checked Out": { color: "danger", label: "Checked Out" },
+  "Pending Delivery": { color: "warning", label: "Pending Delivery" },
+};
+
+export default function BookDetails() {
+  const { id } = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: session } = authClient.useSession();
+
+  const [book, setBook] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [unpublishing, setUnpublishing] = useState(false);
+
+  const fetchBook = useCallback(async () => {
+    try {
+      const data = await getBook(id);
+      setBook(data);
+    } catch (error) {
+      console.log(error);
+      setBook(null);
+      toast.error("Failed to load book details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  const fetchReviews = useCallback(async () => {
+    try {
+      const data = await getBookReviews(id);
+      setReviews(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.log(error);
+      setReviews([]);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchBook();
+    fetchReviews();
+  }, [fetchBook, fetchReviews]);
+
+  // Handle return from Stripe Checkout
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      toast.success("Payment successful! Delivery is now pending.");
+      fetchBook();
+      router.replace(`/books/${id}`);
+    } else if (searchParams.get("canceled") === "true") {
+      toast.info("Payment was canceled.");
+      router.replace(`/books/${id}`);
+    }
+  }, [searchParams, fetchBook, id, router]);
+
+  const isOwnerLibrarian =
+    session?.user?.role === "librarian" &&
+    session?.user?.id === book?.librarianId;
+
+  const isCheckedOut = book?.status === "Checked Out";
+  const requestDisabled = isCheckedOut || isOwnerLibrarian || requesting;
+
+  const handleRequestDelivery = async () => {
+    if (!session) {
+      toast.info("Please log in to request delivery.");
+      router.push("/login");
+      return;
+    }
+
+    setRequesting(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/create-checkout-session`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bookId: book._id,
+            userId: session.user.id,
+            deliveryFee: book.deliveryFee,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.message || "Could not start checkout.");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong starting checkout.");
+      setRequesting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this book? This cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) throw new Error();
+
+      toast.success("Book deleted.");
+      router.push("/dashboard/manage-books");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete book.");
+      setDeleting(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    setUnpublishing(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ available: false, status: "Unpublished" }),
+        },
+      );
+      if (!res.ok) throw new Error();
+
+      toast.success("Book unpublished.");
+      fetchBook();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to unpublish book.");
+    } finally {
+      setUnpublishing(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="max-w-6xl mx-auto px-4 py-16">
+        <div className="grid md:grid-cols-2 gap-10">
+          <Skeleton className="h-[480px] rounded-2xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-3/4 rounded-lg" />
+            <Skeleton className="h-5 w-1/2 rounded-lg" />
+            <Skeleton className="h-24 w-full rounded-lg" />
+            <Skeleton className="h-10 w-40 rounded-lg" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!book) {
+    return (
+      <section className="max-w-6xl mx-auto px-4 py-24 text-center">
+        <h1 className="text-2xl font-bold">Book not found</h1>
+        <p className="text-default-500 mt-2">
+          The book you&apos;re looking for doesn&apos;t exist or was removed.
+        </p>
+        <NextLink
+          href="/books"
+          className="button button--primary mt-6 inline-flex"
+        >
+          Back to Browse Books
+        </NextLink>
+      </section>
+    );
+  }
+
+  const statusInfo = STATUS_STYLES[book.status] || {
+    color: "default",
+    label: book.status,
+  };
+
+  const avgRating =
+    reviews.length > 0
+      ? (
+          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        ).toFixed(1)
+      : null;
+
+  return (
+    <section className="max-w-6xl mx-auto px-4 py-16">
+      <div className="grid md:grid-cols-2 gap-10">
+        {/* Cover Image */}
+        <div className="relative h-[420px] md:h-[520px] rounded-2xl overflow-hidden shadow-lg">
+          <Image
+            src={book.image}
+            alt={book.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
+          />
+        </div>
+
+        {/* Info */}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3 mb-3">
+            <Chip variant="soft" color={statusInfo.color}>
+              <Chip.Label>{statusInfo.label}</Chip.Label>
+            </Chip>
+            {book.category && (
+              <Chip variant="soft" color="accent">
+                <Chip.Label>{book.category}</Chip.Label>
+              </Chip>
+            )}
+            {avgRating && (
+              <div className="flex items-center gap-1 text-sm text-default-500">
+                <Star size={14} className="fill-warning text-warning" />
+                {avgRating} ({reviews.length})
+              </div>
+            )}
+          </div>
+
+          <h1 className="text-3xl md:text-4xl font-bold">{book.title}</h1>
+
+          <div className="flex items-center gap-2 text-default-500 mt-2">
+            <User size={16} />
+            <span>{book.author}</span>
+          </div>
+
+          {book.createdAt && (
+            <div className="flex items-center gap-2 text-default-500 mt-1 text-sm">
+              <CalendarDays size={14} />
+              <span>
+                Added on{" "}
+                {new Date(book.createdAt).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </span>
+            </div>
+          )}
+
+          <p className="text-default-600 mt-6 leading-relaxed">
+            {book.description}
+          </p>
+
+          <p className="text-xl font-semibold mt-6">
+            Delivery Fee: ${book.deliveryFee}
+          </p>
+
+          {/* Request Delivery */}
+          <Button
+            variant="primary"
+            className="w-full md:w-auto mt-6"
+            isDisabled={requestDisabled}
+            onPress={handleRequestDelivery}
+          >
+            {requesting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Redirecting to checkout...
+              </>
+            ) : (
+              <>
+                <Truck size={16} />
+                Request Delivery
+              </>
+            )}
+          </Button>
+
+          {isOwnerLibrarian && (
+            <p className="text-xs text-default-400 mt-2">
+              You own this listing, so you can&apos;t request delivery on it.
+            </p>
+          )}
+          {isCheckedOut && !isOwnerLibrarian && (
+            <p className="text-xs text-default-400 mt-2">
+              This book is currently checked out.
+            </p>
+          )}
+
+          {/* Librarian Controls */}
+          {isOwnerLibrarian && (
+            <div className="flex flex-wrap gap-3 mt-8 pt-6 border-t border-default-200">
+              <NextLink
+                href={`/dashboard/manage-books/edit/${book._id}`}
+                className="button button--secondary inline-flex items-center gap-2"
+              >
+                <Pencil size={16} />
+                Edit
+              </NextLink>
+
+              <Button
+                variant="outline"
+                isDisabled={unpublishing}
+                onPress={handleUnpublish}
+              >
+                <EyeOff size={16} />
+                {unpublishing ? "Unpublishing..." : "Unpublish"}
+              </Button>
+
+              <Button
+                variant="danger"
+                isDisabled={deleting}
+                onPress={handleDelete}
+              >
+                <Trash2 size={16} />
+                {deleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="mt-16 pt-10 border-t border-default-200">
+        <div className="flex items-center gap-2 mb-6">
+          <MessageSquareText size={20} className="text-primary" />
+          <h2 className="text-2xl font-bold">
+            Reviews {reviews.length > 0 && `(${reviews.length})`}
+          </h2>
+        </div>
+
+        {reviews.length === 0 ? (
+          <p className="text-default-500">No reviews yet for this book.</p>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-5">
+            {reviews.map((review) => (
+              <Card key={review._id} className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {review.userImage ? (
+                      <div className="relative h-8 w-8 rounded-full overflow-hidden">
+                        <Image
+                          src={review.userImage}
+                          alt={review.userName || "Reviewer"}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-default-200 flex items-center justify-center">
+                        <User size={14} className="text-default-500" />
+                      </div>
+                    )}
+                    <span className="font-medium text-sm">
+                      {review.userName || "Anonymous Reader"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        className={
+                          i < (review.rating || 0)
+                            ? "fill-warning text-warning"
+                            : "text-default-300"
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-sm text-default-600 leading-relaxed">
+                  {review.comment}
+                </p>
+
+                {review.createdAt && (
+                  <p className="text-xs text-default-400 mt-3">
+                    {new Date(review.createdAt).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
