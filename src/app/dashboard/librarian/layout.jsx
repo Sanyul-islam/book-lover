@@ -6,9 +6,9 @@ import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
+  PlusCircle,
+  Library,
   Truck,
-  BookMarked,
-  Star,
   User,
   Menu,
   X,
@@ -18,30 +18,37 @@ import { authClient } from "@/lib/auth-client";
 const MENU_ITEMS = [
   {
     label: "Overview",
-    href: "/dashboard/user",
+    href: "/dashboard/librarian",
     icon: LayoutDashboard,
     exact: true,
   },
   {
-    label: "Delivery History",
-    href: "/dashboard/user/delivery-history",
-    icon: Truck,
+    label: "Add Book",
+    href: "/dashboard/librarian/add-book",
+    icon: PlusCircle,
   },
   {
-    label: "My Reading List",
-    href: "/dashboard/user/reading-list",
-    icon: BookMarked,
+    label: "Manage Inventory",
+    href: "/dashboard/librarian/manage-inventory",
+    icon: Library,
   },
-  { label: "My Reviews", href: "/dashboard/user/reviews", icon: Star },
+  {
+    label: "Manage Deliveries",
+    href: "/dashboard/librarian/manage-deliveries",
+    icon: Truck,
+  },
 ];
 
-export default function UserDashboardLayout({ children }) {
+export default function LibrarianDashboardLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-
+  if (!isPending && !session) {
+    router.push("/login");
+    return null;
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
@@ -56,7 +63,7 @@ export default function UserDashboardLayout({ children }) {
 
       {/* Sidebar */}
       <aside
-        className={`md:w-64 min-h-screen shrink-0 ${isSidebarOpen ? "block" : "hidden"} md:block`}
+        className={`md:w-64 shrink-0 ${isSidebarOpen ? "block" : "hidden"} md:block`}
       >
         <div className="rounded-2xl border border-default-200 p-5 sticky top-24">
           {/* Profile */}
@@ -68,7 +75,6 @@ export default function UserDashboardLayout({ children }) {
                   alt={session.user.name || "Profile"}
                   fill
                   sizes="(max-width: 768px) 2.75rem, 2.75rem"
-                  className="object-cover"
                 />
               </div>
             ) : (
@@ -78,7 +84,7 @@ export default function UserDashboardLayout({ children }) {
             )}
             <div className="min-w-0">
               <p className="font-semibold text-sm line-clamp-1">
-                {session?.user?.name || "Reader"}
+                {session?.user?.name || "Librarian"}
               </p>
               <p className="text-xs text-default-500 line-clamp-1">
                 {session?.user?.email}

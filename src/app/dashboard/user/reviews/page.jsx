@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Skeleton, Button } from "@heroui/react";
 import { Star, Pencil, Trash2, X, Check } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -18,25 +18,29 @@ export default function MyReviewsPage() {
   const [savingReview, setSavingReview] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const fetchReviews = useCallback(async () => {
-    if (!session?.user?.id) return;
-
-    setLoading(true);
-    try {
-      const data = await getUserReviews(session.user.id);
-      setReviews(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load your reviews.");
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.user?.id]);
-
   useEffect(() => {
-    if (!sessionLoading && session) fetchReviews();
-  }, [sessionLoading, session, fetchReviews]);
+    if (sessionLoading || !session?.user?.id) return;
+
+    let ignore = false;
+
+    async function fetchReviews() {
+      try {
+        const data = await getUserReviews(session.user.id);
+        if (!ignore) setReviews(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error(error);
+        if (!ignore) toast.error("Failed to load your reviews.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    fetchReviews();
+
+    return () => {
+      ignore = true;
+    };
+  }, [sessionLoading, session]);
 
   const startEditing = (review) => {
     setEditingId(review._id);

@@ -1,114 +1,96 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Chip, Skeleton, Table } from "@heroui/react";
-import { PackageCheck, PackageSearch, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import NextLink from "next/link";
+import { Skeleton } from "@heroui/react";
+import { BookOpen } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getDeliveries from "@/data/getDeliveries";
 
-const STATUS_META = {
-  Pending: { color: "warning", icon: Clock },
-  Dispatched: { color: "accent", icon: PackageSearch },
-  Delivered: { color: "success", icon: PackageCheck },
-};
-
-export default function DeliveryHistoryPage() {
+export default function ReadingListPage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
-  const [deliveries, setDeliveries] = useState([]);
+  const [readingList, setReadingList] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const fetchDeliveries = useCallback(async () => {
-    if (!session?.user?.id) return;
-
-    setLoading(true);
-    try {
-      const data = await getDeliveries(session.user.id);
-      setDeliveries(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load delivery history.");
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.user?.id]);
-
   useEffect(() => {
-    if (!sessionLoading && session) fetchDeliveries();
-  }, [sessionLoading, session, fetchDeliveries]);
+    if (sessionLoading || !session?.user?.id) return;
+
+    let ignore = false;
+
+    async function fetchReadingList() {
+      try {
+        const data = await getDeliveries(session.user.id);
+        const delivered = Array.isArray(data)
+          ? data.filter((d) => d.status === "Delivered")
+          : [];
+        if (!ignore) setReadingList(delivered);
+      } catch (error) {
+        console.error(error);
+        if (!ignore) toast.error("Failed to load your reading list.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    fetchReadingList();
+
+    return () => {
+      ignore = true;
+    };
+  }, [sessionLoading, session]);
 
   if (sessionLoading || loading) {
     return (
       <div className="space-y-3">
         <Skeleton className="h-9 w-56 rounded-lg" />
-        <Skeleton className="h-64 rounded-2xl" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-56 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Delivery History</h1>
+      <h1 className="text-2xl font-bold mb-6">My Reading List</h1>
 
-      {deliveries.length === 0 ? (
+      {readingList.length === 0 ? (
         <p className="text-default-500">
-          You haven&apos;t requested any deliveries yet.
+          Books you&apos;ve received will show up here once delivered.
         </p>
       ) : (
-        <Table>
-          <Table.ScrollContainer>
-            <Table.Content aria-label="Delivery history">
-              <Table.Header>
-                <Table.Column className="text-center">Book Title</Table.Column>
-                <Table.Column className="text-center">
-                  Delivery Fee
-                </Table.Column>
-                <Table.Column className="text-center">
-                  Request Date
-                </Table.Column>
-                <Table.Column className="text-center">Status</Table.Column>
-              </Table.Header>
-              <Table.Body>
-                {deliveries.map((d) => {
-                  const meta = STATUS_META[d.status] || {
-                    color: "default",
-                    icon: Clock,
-                  };
-                  const StatusIcon = meta.icon;
-                  return (
-                    <Table.Row key={d._id}>
-                      <Table.Cell className="text-center font-medium">
-                        {d.bookTitle}
-                      </Table.Cell>
-                      <Table.Cell className="text-center">
-                        ${Number(d.deliveryFee).toFixed(2)}
-                      </Table.Cell>
-                      <Table.Cell className="text-center text-default-500">
-                        {d.requestDate
-                          ? new Date(d.requestDate).toLocaleDateString(
-                              undefined,
-                              {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              },
-                            )
-                          : "—"}
-                      </Table.Cell>
-                      <Table.Cell className="text-center">
-                        <Chip variant="soft" color={meta.color} size="sm">
-                          <StatusIcon size={12} />
-                          <Chip.Label>{d.status}</Chip.Label>
-                        </Chip>
-                      </Table.Cell>
-                    </Table.Row>
-                  );
-                })}
-              </Table.Body>
-            </Table.Content>
-          </Table.ScrollContainer>
-        </Table>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          {readingList.map((item) => (
+            <NextLink
+              key={item._id}
+              href={item.bookId ? `/books/${item.bookId}` : "#"}
+              className="group"
+            >
+              <div className="relative h-56 rounded-xl overflow-hidden shadow-sm">
+                {item.bookImage ? (
+                  <Image
+                    src={item.bookImage}
+                    alt={item.bookTitle}
+                    fill
+                    className="object-cover transition-transform group-hover:scale-105"
+                    sizes="(max-width:768px) 50vw, 25vw"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-default-100 flex items-center justify-center">
+                    <BookOpen className="text-default-300" size={32} />
+                  </div>
+                )}
+              </div>
+              <p className="mt-2 text-sm font-medium line-clamp-1">
+                {item.bookTitle}
+              </p>
+            </NextLink>
+          ))}
+        </div>
       )}
     </div>
   );

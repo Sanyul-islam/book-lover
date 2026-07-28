@@ -1,4 +1,4 @@
-import {getBooks} from "@/lib/server";
+import getBooks from "@/data/getBooks";
 import BookCard from "./BookCard";
 import { Chip } from "@heroui/react";
 import { Sparkles } from "lucide-react";

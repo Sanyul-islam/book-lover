@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import NextLink from "next/link";
@@ -18,8 +18,8 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
-import {getBook} from "@/lib/server";
-import {getBookReviews} from "@/lib/server";
+import getBook from "@/data/getBook";
+import getBookReviews from "@/data/getBookReviews";
 
 const STATUS_STYLES = {
   Available: { color: "success", label: "Available" },
@@ -40,45 +40,67 @@ export default function BookDetails() {
   const [deleting, setDeleting] = useState(false);
   const [unpublishing, setUnpublishing] = useState(false);
 
-  const fetchBook = useCallback(async () => {
-    try {
-      const data = await getBook(id);
-      setBook(data);
-    } catch (error) {
-      console.log(error);
-      setBook(null);
-      toast.error("Failed to load book details.");
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  const fetchReviews = useCallback(async () => {
-    try {
-      const data = await getBookReviews(id);
-      setReviews(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.log(error);
-      setReviews([]);
-    }
-  }, [id]);
-
   useEffect(() => {
+    let ignore = false;
+
+    async function fetchBook() {
+      try {
+        const data = await getBook(id);
+        if (!ignore) setBook(data);
+      } catch (error) {
+        console.log(error);
+        if (!ignore) {
+          setBook(null);
+          toast.error("Failed to load book details.");
+        }
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    async function fetchReviews() {
+      try {
+        const data = await getBookReviews(id);
+        if (!ignore) setReviews(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.log(error);
+        if (!ignore) setReviews([]);
+      }
+    }
+
     fetchBook();
     fetchReviews();
-  }, [fetchBook, fetchReviews]);
+
+    return () => {
+      ignore = true;
+    };
+  }, [id]);
 
   // Handle return from Stripe Checkout
   useEffect(() => {
     if (searchParams.get("success") === "true") {
+      let ignore = false;
+
       toast.success("Payment successful! Delivery is now pending.");
-      fetchBook();
+
+      getBook(id)
+        .then((data) => {
+          if (!ignore) setBook(data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
       router.replace(`/books/${id}`);
+
+      return () => {
+        ignore = true;
+      };
     } else if (searchParams.get("canceled") === "true") {
       toast.info("Payment was canceled.");
       router.replace(`/books/${id}`);
     }
-  }, [searchParams, fetchBook, id, router]);
+  }, [searchParams, id, router]);
 
   const isOwnerLibrarian =
     session?.user?.role === "librarian" &&
@@ -173,7 +195,7 @@ export default function BookDetails() {
     return (
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-10">
-          <Skeleton className="h-[480px] rounded-2xl" />
+          <Skeleton className="h-120 rounded-2xl" />
           <div className="space-y-4">
             <Skeleton className="h-8 w-3/4 rounded-lg" />
             <Skeleton className="h-5 w-1/2 rounded-lg" />
@@ -218,7 +240,7 @@ export default function BookDetails() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <div className="grid md:grid-cols-2 gap-10">
         {/* Cover Image */}
-        <div className="relative h-[420px] md:h-[520px] rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative h-105 md:h-130 rounded-2xl overflow-hidden shadow-lg">
           <Image
             src={book.image}
             alt={book.title}

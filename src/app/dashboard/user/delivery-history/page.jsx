@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Chip, Skeleton, Table } from "@heroui/react";
 import { PackageCheck, PackageSearch, Clock } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -18,25 +18,29 @@ export default function DeliveryHistoryPage() {
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/preserve-manual-memoization
-  const fetchDeliveries = useCallback(async () => {
-    if (!session?.user?.id) return;
-
-    setLoading(true);
-    try {
-      const data = await getDeliveries(session.user.id);
-      setDeliveries(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load delivery history.");
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.user?.id]);
-
   useEffect(() => {
-    if (!sessionLoading && session) fetchDeliveries();
-  }, [sessionLoading, session, fetchDeliveries]);
+    if (sessionLoading || !session?.user?.id) return;
+
+    let ignore = false;
+
+    async function fetchDeliveries() {
+      try {
+        const data = await getDeliveries(session.user.id);
+        if (!ignore) setDeliveries(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error(error);
+        if (!ignore) toast.error("Failed to load delivery history.");
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    }
+
+    fetchDeliveries();
+
+    return () => {
+      ignore = true;
+    };
+  }, [sessionLoading, session]);
 
   if (sessionLoading || loading) {
     return (

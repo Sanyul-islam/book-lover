@@ -9,7 +9,7 @@ import "swiper/css";
 import "swiper/css/effect-cards";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import {getBooks} from "@/lib/server";
+import getBooks from "@/data/getBooks";
 import Link from "next/link";
 
 const books = await getBooks();

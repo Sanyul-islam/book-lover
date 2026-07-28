@@ -1,33 +1,35 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card, Skeleton } from "@heroui/react";
-import { BookOpen, Truck, Wallet } from "lucide-react";
+import { Card, Skeleton, Chip } from "@heroui/react";
+import { Library, Wallet, Clock3, TrendingUp } from "lucide-react";
 import {
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
   BarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from "recharts";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
-import getDeliveries from "@/data/getDeliveries";
+import getLibrarianBooks from "@/data/getLibrarianBooks";
+import getLibrarianDeliveries from "@/data/getLibrarianDeliveries";
 
-const PIE_COLORS = {
-  Pending: "#f5a524",
-  Dispatched: "#006fee",
-  Delivered: "#17c964",
+const STATUS_PIE_COLORS = {
+  "Pending Approval": "#f5a524",
+  Published: "#17c964",
+  Unpublished: "#71717a",
 };
 
-export default function UserDashboardOverview() {
+export default function LibrarianDashboardOverview() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
+  const [books, setBooks] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -36,10 +38,16 @@ export default function UserDashboardOverview() {
 
     let ignore = false;
 
-    async function fetchDeliveries() {
+    async function fetchData() {
       try {
-        const data = await getDeliveries(session.user.id);
-        if (!ignore) setDeliveries(Array.isArray(data) ? data : []);
+        const [booksData, deliveriesData] = await Promise.all([
+          getLibrarianBooks(session.user.id),
+          getLibrarianDeliveries(session.user.id),
+        ]);
+        if (!ignore) {
+          setBooks(Array.isArray(booksData) ? booksData : []);
+          setDeliveries(Array.isArray(deliveriesData) ? deliveriesData : []);
+        }
       } catch (error) {
         console.error(error);
         if (!ignore) toast.error("Failed to load your dashboard.");
@@ -48,43 +56,40 @@ export default function UserDashboardOverview() {
       }
     }
 
-    fetchDeliveries();
+    fetchData();
 
     return () => {
       ignore = true;
     };
   }, [sessionLoading, session]);
 
-  const totalBooksRead = useMemo(
-    () => deliveries.filter((d) => d.status === "Delivered").length,
-    [deliveries],
-  );
+  const totalBooksListed = books.length;
 
-  const pendingDeliveries = useMemo(
+  const totalEarnings = useMemo(
     () =>
-      deliveries.filter(
-        (d) => d.status === "Pending" || d.status === "Dispatched",
-      ).length,
+      deliveries
+        .filter((d) => d.status === "Delivered" || d.status === "Dispatched")
+        .reduce((sum, d) => sum + (Number(d.deliveryFee) || 0), 0),
     [deliveries],
   );
 
-  const totalSpent = useMemo(
-    () => deliveries.reduce((sum, d) => sum + (Number(d.deliveryFee) || 0), 0),
+  const activePendingRequests = useMemo(
+    () => deliveries.filter((d) => d.status === "Pending").length,
     [deliveries],
   );
 
   const statusBreakdown = useMemo(() => {
-    const counts = { Pending: 0, Dispatched: 0, Delivered: 0 };
-    deliveries.forEach((d) => {
-      if (counts[d.status] !== undefined) counts[d.status] += 1;
+    const counts = { "Pending Approval": 0, Published: 0, Unpublished: 0 };
+    books.forEach((b) => {
+      if (counts[b.status] !== undefined) counts[b.status] += 1;
     });
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
-  }, [deliveries]);
+  }, [books]);
 
-  const monthlySpend = useMemo(() => {
+  const monthlyEarnings = useMemo(() => {
     const months = {};
     deliveries.forEach((d) => {
-      if (!d.requestDate) return;
+      if (!d.requestDate || d.status === "Pending") return;
       const date = new Date(d.requestDate);
       const key = date.toLocaleDateString(undefined, {
         month: "short",
@@ -98,10 +103,25 @@ export default function UserDashboardOverview() {
         month: "short",
         year: "2-digit",
       });
-      return [{ month: currentMonth, fee: 0 }];
+      return [{ month: currentMonth, earnings: 0 }];
     }
 
-    return Object.entries(months).map(([month, fee]) => ({ month, fee }));
+    return Object.entries(months).map(([month, earnings]) => ({
+      month,
+      earnings,
+    }));
+  }, [deliveries]);
+
+  const mostRequested = useMemo(() => {
+    const counts = {};
+    deliveries.forEach((d) => {
+      if (!d.bookTitle) return;
+      counts[d.bookTitle] = (counts[d.bookTitle] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([title, requests]) => ({ title, requests }))
+      .sort((a, b) => b.requests - a.requests)
+      .slice(0, 5);
   }, [deliveries]);
 
   if (sessionLoading || loading) {
@@ -128,36 +148,36 @@ export default function UserDashboardOverview() {
           Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}
         </h1>
         <p className="text-default-500 mt-1">
-          Here&apos;s a look at your reading activity and deliveries.
+          Here&apos;s how your listed books are performing.
         </p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid md:grid-cols-3 gap-5 text-center">
         <StatCard
-          icon={BookOpen}
-          label="Total Books Read"
-          value={totalBooksRead}
-          color="success"
-        />
-        <StatCard
-          icon={Truck}
-          label="Pending Deliveries"
-          value={pendingDeliveries}
-          color="warning"
+          icon={Library}
+          label="Total Books Listed"
+          value={totalBooksListed}
+          color="primary"
         />
         <StatCard
           icon={Wallet}
-          label="Total Spent on Fees"
-          value={`$${totalSpent.toFixed(2)}`}
-          color="accent"
+          label="Total Earnings"
+          value={`$${totalEarnings.toFixed(2)}`}
+          color="success"
+        />
+        <StatCard
+          icon={Clock3}
+          label="Active Pending Requests"
+          value={activePendingRequests}
+          color="warning"
         />
       </div>
 
       {/* Charts */}
       <div className="grid md:grid-cols-2 gap-5">
         <Card className="p-6">
-          <h2 className="font-bold mb-4">Delivery Status Breakdown</h2>
+          <h2 className="font-bold mb-4">Inventory Status Breakdown</h2>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
@@ -171,7 +191,7 @@ export default function UserDashboardOverview() {
                 {statusBreakdown.map((entry) => (
                   <Cell
                     key={entry.name}
-                    fill={PIE_COLORS[entry.name] || "#999"}
+                    fill={STATUS_PIE_COLORS[entry.name] || "#999"}
                   />
                 ))}
               </Pie>
@@ -182,17 +202,47 @@ export default function UserDashboardOverview() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="font-bold mb-4">Spending Over Time</h2>
+          <h2 className="font-bold mb-4">Earnings Over Time</h2>
           <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={monthlySpend}>
+            <BarChart data={monthlyEarnings}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="month" fontSize={12} />
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-              <Bar dataKey="fee" fill="#006fee" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="earnings" fill="#17c964" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
+      </div>
+
+      {/* Most Requested Books */}
+      <div>
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp size={20} className="text-primary" />
+          <h2 className="text-2xl font-bold">Most Requested Books</h2>
+        </div>
+
+        {mostRequested.length === 0 ? (
+          <p className="text-default-500">No delivery requests yet.</p>
+        ) : (
+          <Card className="p-2">
+            {mostRequested.map((item, i) => (
+              <div
+                key={item.title}
+                className={`flex items-center justify-between px-4 py-3 ${
+                  i !== mostRequested.length - 1
+                    ? "border-b border-default-100"
+                    : ""
+                }`}
+              >
+                <span className="text-sm font-medium">{item.title}</span>
+                <Chip variant="soft" color="primary" size="sm">
+                  <Chip.Label>{item.requests} requests</Chip.Label>
+                </Chip>
+              </div>
+            ))}
+          </Card>
+        )}
       </div>
     </div>
   );
