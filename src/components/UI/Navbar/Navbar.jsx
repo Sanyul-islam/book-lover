@@ -15,26 +15,19 @@ export default function NavbarComponent() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session } = authClient.useSession();
-  const role = session?.user?.role || "reader";
+  const role = session?.user?.role || "user";
+
+  const dashboardHref =
+    role === "librarian"
+      ? "/dashboard/librarian"
+      : role === "admin"
+        ? "/dashboard/admin"
+        : "/dashboard/user";
 
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Browse Books", href: "/books" },
   ];
-
-  const dashboardLinks =
-    role === "librarian"
-      ? [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Add Book", href: "/dashboard/add-book" },
-          { label: "Manage Books", href: "/dashboard/manage-books" },
-          { label: "Borrow Requests", href: "/dashboard/borrow-requests" },
-        ]
-      : [
-          { label: "Dashboard", href: "/dashboard" },
-          { label: "Borrowed Books", href: "/dashboard/borrowed-books" },
-          { label: "Profile", href: "/dashboard/profile" },
-        ];
 
   const handleLogout = async () => {
     try {
@@ -86,37 +79,16 @@ export default function NavbarComponent() {
               ))}
 
               {session && (
-                <Dropdown>
-                  <Dropdown.Trigger asChild>
-                    <span
-                      role="button"
-                      tabIndex={0}
-                      className={`cursor-pointer select-none transition text-sm font-medium focus:outline-none ${
-                        pathname.startsWith("/dashboard")
-                          ? "text-primary font-semibold"
-                          : "text-default-600 hover:text-primary"
-                      }`}
-                    >
-                      Dashboard
-                    </span>
-                  </Dropdown.Trigger>
-                  <Dropdown.Popover>
-                    <Dropdown.Menu
-                      onAction={(key) => router.push(key)}
-                      aria-label="Dashboard Options"
-                    >
-                      {dashboardLinks.map((item) => (
-                        <Dropdown.Item
-                          key={item.href}
-                          id={item.href}
-                          textValue={item.label}
-                        >
-                          <Label>{item.label}</Label>
-                        </Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown.Popover>
-                </Dropdown>
+                <Link
+                  href={dashboardHref}
+                  className={`transition text-sm font-medium ${
+                    pathname.startsWith("/dashboard")
+                      ? "text-primary font-semibold"
+                      : "text-default-600 hover:text-primary"
+                  }`}
+                >
+                  Dashboard
+                </Link>
               )}
             </div>
           </div>
@@ -169,9 +141,9 @@ export default function NavbarComponent() {
                     aria-label="User Actions"
                   >
                     <Dropdown.Item
-                      key="profile"
-                      id="/dashboard/profile"
-                      textValue="Profile"
+                      key="dashboard"
+                      id={dashboardHref}
+                      textValue="Dashboard"
                     >
                       <Label className="font-medium cursor-pointer">
                         {session.user.name}
@@ -213,29 +185,19 @@ export default function NavbarComponent() {
           ))}
 
           {session && (
-            <div className="pt-4 pb-2 border-t border-default-100">
-              <p className="px-3 text-xs font-semibold text-default-400 uppercase tracking-wider">
-                Dashboard
-              </p>
-              <div className="mt-1 space-y-1">
-                {dashboardLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`block px-3 py-2 rounded-md text-base font-medium ${
-                      pathname === item.href
-                        ? "bg-primary/10 text-primary"
-                        : "text-default-600 hover:bg-default-50 hover:text-primary"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <Link
+              href={dashboardHref}
+              onClick={() => setIsMenuOpen(false)}
+              className={`block px-3 py-2 rounded-md text-base font-medium ${
+                pathname.startsWith("/dashboard")
+                  ? "bg-primary/10 text-primary"
+                  : "text-default-600 hover:bg-default-50 hover:text-primary"
+              }`}
+            >
+              Dashboard
+            </Link>
           )}
-          
+
           <div className="pt-4 border-t border-default-100">
             {!session ? (
               <Link
