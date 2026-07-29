@@ -122,7 +122,9 @@ export default function ManageUsersPage() {
           <Table.ScrollContainer>
             <Table.Content aria-label="Manage users">
               <Table.Header>
-                <Table.Column className="text-center" isRowHeader>Name</Table.Column>
+                <Table.Column className="text-center" isRowHeader>
+                  Name
+                </Table.Column>
                 <Table.Column className="text-center">Email</Table.Column>
                 <Table.Column className="text-center">Role</Table.Column>
                 <Table.Column className="text-center">Actions</Table.Column>
@@ -157,7 +159,11 @@ export default function ManageUsersPage() {
                           className="text-xs rounded-md border border-default-200 px-2 py-1.5 bg-transparent focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-40"
                         >
                           {ROLES.map((r) => (
-                            <option key={r} value={r}>
+                            <option
+                              key={r}
+                              value={r}
+                              className="bg-white text-black dark:bg-neutral-900 dark:text-white"
+                            >
                               {r}
                             </option>
                           ))}
