@@ -114,7 +114,9 @@ export default function ApprovalQueuePage() {
           <Table.ScrollContainer>
             <Table.Content aria-label="Book approval queue">
               <Table.Header>
-                <Table.Column className="text-center">Title</Table.Column>
+                <Table.Column className="text-center" isRowHeader>
+                  Title
+                </Table.Column>
                 <Table.Column className="text-center">Librarian</Table.Column>
                 <Table.Column className="text-center">Category</Table.Column>
                 <Table.Column className="text-center">

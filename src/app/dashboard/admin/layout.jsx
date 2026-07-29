@@ -76,6 +76,7 @@ export default function AdminDashboardLayout({ children }) {
                   src={session.user.image}
                   alt={session.user.name || "Profile"}
                   fill
+                  sizes="44px"
                   className="object-cover"
                 />
               </div>
