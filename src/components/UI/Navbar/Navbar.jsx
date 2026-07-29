@@ -51,6 +51,7 @@ export default function NavbarComponent() {
                 width={180}
                 height={80}
                 src="/navbar-logo.png"
+                priority
                 alt="Book Lover Logo"
               />
             </Link>
@@ -99,6 +100,7 @@ export default function NavbarComponent() {
                 width={180}
                 height={80}
                 src="/navbar-logo.png"
+                priority
                 alt="Book Lover Logo"
               />
             </Link>

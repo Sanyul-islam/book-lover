@@ -19,6 +19,7 @@ export default function Footer() {
                 width={180}
                 height={50}
                 src="/navbar-logo.png"
+                priority
                 alt="Book Lover Logo"
               />
               {/* <span className="text-2xl font-bold">Book Lover</span> */}

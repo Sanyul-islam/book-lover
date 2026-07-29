@@ -100,6 +100,7 @@ export default function RegisterPage() {
                 width={440}
                 height={440}
                 src="/navbar-logo.png"
+                priority
                 alt="Book Lover Logo"
               />
             </div>
@@ -331,7 +332,10 @@ export default function RegisterPage() {
 
             <div className="text-center text-sm text-default-600">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold text-sky-500 hover:underline">
+              <Link
+                href="/login"
+                className="font-semibold text-sky-500 hover:underline"
+              >
                 Login Now
               </Link>
             </div>

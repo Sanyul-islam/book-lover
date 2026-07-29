@@ -81,6 +81,7 @@ export default function LoginPage() {
                 width={440}
                 height={440}
                 src="/navbar-logo.png"
+                priority
                 alt="Book Lover Logo"
               />
             </div>
