@@ -5,6 +5,7 @@ import { Button, Separator, Input } from "@heroui/react";
 
 import { FaFacebook, FaGithub, FaInstagram, FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
+import { motion } from "motion/react";
 
 export default function Footer() {
   return (
@@ -69,10 +70,11 @@ export default function Footer() {
 
             <div className="space-y-3">
               <Input type="email" placeholder="Enter your email" radius="lg" />
-
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button color="primary" radius="lg" fullWidth>
                 Subscribe
               </Button>
+              </motion.div>
             </div>
           </div>
 
@@ -126,17 +128,17 @@ export default function Footer() {
           <p>© {new Date().getFullYear()} Book Lover. All rights reserved.</p>
 
           <div className="flex gap-5">
-            <Link href="/about" className="hover:text-primary">
+            <span className="hover:text-primary">
               About
-            </Link>
+            </span>
 
-            <Link href="/contact" className="hover:text-primary">
+            <span className="hover:text-primary">
               Contact
-            </Link>
+            </span>
 
-            <Link href="/privacy-policy" className="hover:text-primary">
+            <span className="hover:text-primary">
               Privacy Policy
-            </Link>
+            </span>
           </div>
         </div>
       </div>

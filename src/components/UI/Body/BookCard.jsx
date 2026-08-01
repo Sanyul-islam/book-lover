@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Card, Button, Chip } from "@heroui/react";
+import { motion } from "motion/react";
 
 export default function BookCard({ book }) {
   const { _id, title, author, category, image, price, publishedYear } = book;
@@ -47,6 +48,7 @@ export default function BookCard({ book }) {
       </Card.Content>
 
       <Card.Footer className="px-5 pb-5">
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.8 }}>
         <Link
           href={`/books/${_id}`}
         >
@@ -57,6 +59,7 @@ export default function BookCard({ book }) {
           View Details
         </Button>
         </Link>
+        </motion.div>
       </Card.Footer>
     </Card>
   );
