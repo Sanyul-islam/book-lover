@@ -98,7 +98,7 @@ export default function PopularCategories() {
           {categories.slice(0,4).map((category) => (
             <Link
               key={category.name}
-              href={`/browse-books?category=${encodeURIComponent(category.name)}`}
+              href={`/books?category=${encodeURIComponent(category.name)}`}
             >
               <Card className="cursor-pointer rounded-2xl border border-default-200 hover:border-primary hover:shadow-lg transition-all duration-300">
                 <Card.Content className="flex flex-col items-center justify-center gap-3 py-8">
@@ -130,7 +130,7 @@ export default function PopularCategories() {
           {categories.slice(4,8).map((category) => (
             <Link
               key={category.name}
-              href={`/browse-books?category=${encodeURIComponent(category.name)}`}
+              href={`/books?category=${encodeURIComponent(category.name)}`}
             >
               <Card className="cursor-pointer rounded-2xl border border-default-200 hover:border-primary hover:shadow-lg transition-all duration-300">
                 <Card.Content className="flex flex-col items-center justify-center gap-3 py-8">

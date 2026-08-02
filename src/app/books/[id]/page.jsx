@@ -15,11 +15,13 @@ import {
   Star,
   MessageSquareText,
   Loader2,
+  Send,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getBook from "@/data/getBook";
 import getBookReviews from "@/data/getBookReviews";
+import checkPurchase from "@/data/checkPurchase";
 
 const STATUS_STYLES = {
   Available: { color: "success", label: "Available" },
@@ -39,6 +41,11 @@ export default function BookDetails() {
   const [requesting, setRequesting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [unpublishing, setUnpublishing] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(true);
 
   useEffect(() => {
     let ignore = false;
@@ -76,21 +83,66 @@ export default function BookDetails() {
     };
   }, [id]);
 
+  // Check whether the current user has purchased this book (gates the review form)
+  useEffect(() => {
+    if (!session?.user?.id || !id) {
+      // No setState here: the review UI only ever renders when `session` is
+      // truthy, so checkingPurchase's value is irrelevant until then.
+      return;
+    }
+
+    let ignore = false;
+
+    async function checkStatus() {
+      try {
+        const purchased = await checkPurchase(session.user.id, id);
+        if (!ignore) setHasPurchased(purchased);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        if (!ignore) setCheckingPurchase(false);
+      }
+    }
+
+    checkStatus();
+
+    return () => {
+      ignore = true;
+    };
+  }, [session, id]);
+
   // Handle return from Stripe Checkout
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       let ignore = false;
+      const sessionId = searchParams.get("session_id");
 
-      toast.success("Payment successful! Delivery is now pending.");
+      async function confirmPayment() {
+        try {
+          if (sessionId) {
+            // Fallback: verifies payment directly with Stripe and creates the
+            // delivery if the webhook hasn't already done so. Safe to call
+            // even if the webhook DID already fire — the backend is idempotent.
+            await fetch(
+              `${process.env.NEXT_PUBLIC_SERVER_URL}/verify-checkout-session`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId }),
+              },
+            );
+          }
 
-      getBook(id)
-        .then((data) => {
+          toast.success("Payment successful! Delivery is now pending.");
+
+          const data = await getBook(id);
           if (!ignore) setBook(data);
-        })
-        .catch((error) => {
+        } catch (error) {
           console.log(error);
-        });
+        }
+      }
 
+      confirmPayment();
       router.replace(`/books/${id}`);
 
       return () => {
@@ -191,11 +243,57 @@ export default function BookDetails() {
     }
   };
 
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+
+    if (!session) {
+      toast.info("Please log in to leave a review.");
+      router.push("/login");
+      return;
+    }
+
+    if (!reviewRating || !reviewComment.trim()) {
+      toast.error("Please add a rating and a comment.");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}/reviews`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: session.user.id,
+            userName: session.user.name,
+            userImage: session.user.image,
+            rating: reviewRating,
+            comment: reviewComment.trim(),
+          }),
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to submit review.");
+
+      setReviews((prev) => [data.review, ...prev]);
+      setReviewRating(0);
+      setReviewComment("");
+      toast.success("Review submitted.");
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || "Failed to submit review.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   if (loading) {
     return (
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-10">
-          <Skeleton className="h-120 rounded-2xl" />
+          <Skeleton className="h-[480px] rounded-2xl" />
           <div className="space-y-4">
             <Skeleton className="h-8 w-3/4 rounded-lg" />
             <Skeleton className="h-5 w-1/2 rounded-lg" />
@@ -240,7 +338,7 @@ export default function BookDetails() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <div className="grid md:grid-cols-2 gap-10">
         {/* Cover Image */}
-        <div className="relative h-105 md:h-130 rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative h-[420px] md:h-[520px] rounded-2xl overflow-hidden shadow-lg">
           <Image
             src={book.image}
             alt={book.title}
@@ -371,6 +469,70 @@ export default function BookDetails() {
             Reviews {reviews.length > 0 && `(${reviews.length})`}
           </h2>
         </div>
+
+        {session && !checkingPurchase && hasPurchased && (
+          <Card className="p-5 mb-8">
+            <form onSubmit={handleSubmitReview} className="space-y-3">
+              <div>
+                <p className="text-sm font-medium mb-1.5">Your Rating</p>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setReviewRating(i + 1)}
+                      aria-label={`Rate ${i + 1} stars`}
+                    >
+                      <Star
+                        size={20}
+                        className={
+                          i < reviewRating
+                            ? "fill-warning text-warning"
+                            : "text-default-300"
+                        }
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                rows={3}
+                placeholder="Share your thoughts about this book..."
+                className="w-full rounded-lg border border-default-200 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                isDisabled={submittingReview}
+              >
+                {submittingReview ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    Submit Review
+                  </>
+                )}
+              </Button>
+            </form>
+          </Card>
+        )}
+
+        {session && !checkingPurchase && !hasPurchased && (
+          <Card className="p-5 mb-8 bg-default-50">
+            <p className="text-sm text-default-500">
+              Only readers who&apos;ve purchased this book can leave a review.
+            </p>
+          </Card>
+        )}
 
         {reviews.length === 0 ? (
           <p className="text-default-500">No reviews yet for this book.</p>
