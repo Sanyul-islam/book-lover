@@ -340,7 +340,7 @@ export default function BookDetails() {
     <section className="max-w-6xl mx-auto px-4 py-16">
       <div className="grid md:grid-cols-2 gap-10">
         {/* Cover Image */}
-        <div className="relative h-[420px] md:h-[520px] rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative h-105 md:h-130 rounded-2xl overflow-hidden shadow-lg">
           <Image
             src={book.image}
             alt={book.title}

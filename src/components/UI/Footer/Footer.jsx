@@ -38,20 +38,20 @@ export default function Footer() {
 
             <ul className="space-y-3 text-default-500">
               <li>
-                <Link href="/about" className="hover:text-primary transition">
+                <Link href="#" className="hover:text-primary transition">
                   About
                 </Link>
               </li>
 
               <li>
-                <Link href="/contact" className="hover:text-primary transition">
+                <Link href="#" className="hover:text-primary transition">
                   Contact
                 </Link>
               </li>
 
               <li>
                 <Link
-                  href="/privacy-policy"
+                  href="#"
                   className="hover:text-primary transition"
                 >
                   Privacy Policy

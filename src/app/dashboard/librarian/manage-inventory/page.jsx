@@ -24,26 +24,20 @@ export default function ManageInventoryPage() {
   useEffect(() => {
     if (sessionLoading || !session?.user?.id) return;
 
-    let ignore = false;
-
     async function fetchBooks() {
       try {
         const data = await getLibrarianBooks(session.user.id);
-        if (!ignore) setBooks(Array.isArray(data) ? data : []);
+        setBooks(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error(error);
-        if (!ignore) toast.error("Failed to load your books.");
+        toast.error("Failed to load your books.");
       } finally {
-        if (!ignore) setLoading(false);
+        setLoading(false);
       }
     }
 
     fetchBooks();
-
-    return () => {
-      ignore = true;
-    };
-  }, [sessionLoading, session]);
+  }, [sessionLoading, session?.user?.id]);
 
   const togglePublish = async (book) => {
     if (book.status === "Pending Approval") {
