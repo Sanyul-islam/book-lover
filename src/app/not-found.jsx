@@ -6,7 +6,7 @@ import { BookOpen, Home, SearchX } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-default-50 to-primary-50 dark:from-background dark:via-default-100 dark:to-default-50 px-4">
+    <section className="min-h-screen flex items-center justify-center bg-linear-to-br from-background via-default-50 to-primary-50 dark:from-background dark:via-default-100 dark:to-default-50 px-4">
       <Card className="max-w-xl w-full p-10 text-center shadow-2xl border border-default-200 rounded-3xl">
         {/* Icon */}
         <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 text-primary">
