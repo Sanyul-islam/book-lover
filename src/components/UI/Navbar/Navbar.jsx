@@ -9,13 +9,27 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { ThemeSwitch } from "../ThemeSwitch/ThemeSwitch";
+import { motion, useScroll, useMotionValueEvent } from "motion/react";
+
 
 export default function NavbarComponent() {
+  
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session } = authClient.useSession();
   const role = session?.user?.role || "user";
+   const { scrollY } = useScroll();
+   const [hidden, setHidden] = useState(false);
+
+   useMotionValueEvent(scrollY, "change", (current) => {
+     const previous = scrollY.getPrevious() ?? 0;
+     if (current > previous && current > 150) {
+       setHidden(true);
+     } else {
+       setHidden(false);
+     }
+   });
 
   const dashboardHref =
     role === "librarian"
@@ -41,8 +55,14 @@ export default function NavbarComponent() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-default-200 bg-background/70 backdrop-blur-md shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <motion.nav animate={{
+          y: hidden ? -140 : 0,
+          opacity: hidden ? 0 : 1,
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+    className="sticky top-0 z-50 w-full border-b border-default-200 bg-background/70 backdrop-blur-md shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      >
         <div className="flex h-16 items-center justify-between">
           <div className="items-center gap-8 hidden md:flex">
             <Link href="/" className="flex items-center h-auto w-auto gap-2">
@@ -220,6 +240,6 @@ export default function NavbarComponent() {
           </div>
         </div>
       )}
-    </nav>
+    </motion.nav>
   );
 }
