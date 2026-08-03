@@ -98,7 +98,7 @@ export default function ManageDeliveriesPage() {
           <Table.ScrollContainer>
             <Table.Content aria-label="Manage deliveries">
               <Table.Header>
-                <Table.Column className="text-center">Client Name</Table.Column>
+                <Table.Column isRowHeader className="text-center">Client Name</Table.Column>
                 <Table.Column className="text-center">Book Title</Table.Column>
                 <Table.Column className="text-center">Date</Table.Column>
                 <Table.Column className="text-center">Status</Table.Column>
