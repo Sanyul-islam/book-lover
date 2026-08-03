@@ -159,7 +159,9 @@ export default function BookDetails() {
     session?.user?.id === book?.librarianId;
 
   const isCheckedOut = book?.status === "Checked Out";
-  const requestDisabled = isCheckedOut || isOwnerLibrarian || requesting;
+  const isBookunAvailable = book?.available === false;
+  const requestDisabled =
+    isCheckedOut || isOwnerLibrarian || requesting || isBookunAvailable;
 
   const handleRequestDelivery = async () => {
     if (!session) {
@@ -293,7 +295,7 @@ export default function BookDetails() {
     return (
       <section className="max-w-6xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-10">
-          <Skeleton className="h-[480px] rounded-2xl" />
+          <Skeleton className="h-120 rounded-2xl" />
           <div className="space-y-4">
             <Skeleton className="h-8 w-3/4 rounded-lg" />
             <Skeleton className="h-5 w-1/2 rounded-lg" />
@@ -347,6 +349,15 @@ export default function BookDetails() {
             sizes="(max-width: 768px) 100vw, 50vw"
             priority
           />
+          {!book.available && (
+            <Chip
+              color="danger"
+              variant="primary"
+              className="absolute top-3 right-3"
+            >
+              <Chip.Label>Unavailable</Chip.Label>
+            </Chip>
+          )}
         </div>
 
         {/* Info */}

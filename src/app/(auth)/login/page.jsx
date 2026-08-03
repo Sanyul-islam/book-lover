@@ -14,15 +14,17 @@ import {
   Separator,
 } from "@heroui/react";
 import { FcGoogle } from "react-icons/fc";
-import { BookOpen } from "lucide-react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FaRegEnvelope } from "react-icons/fa6";
 import { TbLockPassword } from "react-icons/tb";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Image from "next/image";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -164,10 +166,23 @@ export default function LoginPage() {
                       message: "Password must be at least 6 characters",
                     },
                   })}
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   className="w-full px-1 py-1.5 outline-none bg-transparent text-sm"
                 />
+                <InputGroup.Suffix>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="focus:outline-none text-default-400 hover:text-default-600 transition-colors"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff className="size-4" />
+                    ) : (
+                      <FiEye className="size-4" />
+                    )}
+                  </button>
+                </InputGroup.Suffix>
               </InputGroup>
               <FieldError className="text-xs text-danger">
                 {errors.password?.message}

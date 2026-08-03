@@ -77,8 +77,7 @@ export default function BookForm({
     if (!title || !author || !description || !deliveryFee || !image) {
       toast.error("Please fill in all fields and upload a cover image.");
       return;
-    }
-
+    }  
     onSubmit({
       title,
       author,
@@ -133,8 +132,9 @@ export default function BookForm({
               Delivery Fee ($)
             </label>
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="decimal"
+              min="1"
               step="0.01"
               value={deliveryFee}
               onChange={(e) => setDeliveryFee(e.target.value)}

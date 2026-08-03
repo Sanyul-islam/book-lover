@@ -20,7 +20,6 @@ import {
   Radio,
 } from "@heroui/react";
 import { FcGoogle } from "react-icons/fc";
-import { BookOpen } from "lucide-react";
 import { FaRegEnvelope, FaRegUser, FaRegImage } from "react-icons/fa6";
 import { TbLockPassword } from "react-icons/tb";
 import { FiEye, FiEyeOff } from "react-icons/fi";
