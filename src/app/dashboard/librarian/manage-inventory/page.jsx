@@ -7,6 +7,7 @@ import { Pencil, Trash2, Eye, EyeOff, Lock } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getLibrarianBooks from "@/data/getLibrarianBooks";
+import getTokenServer from "@/data/getTokenServer";
 
 const STATUS_COLORS = {
   "Pending Approval": "warning",
@@ -88,9 +89,15 @@ export default function ManageInventoryPage() {
 
     setDeletingId(bookId);
     try {
+      const token  = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${bookId}`,
-        { method: "DELETE" },
+        {
+          method: "DELETE",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        },
       );
       if (!res.ok) throw new Error();
 
