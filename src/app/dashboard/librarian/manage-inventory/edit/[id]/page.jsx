@@ -6,6 +6,7 @@ import { Skeleton } from "@heroui/react";
 import { toast } from "react-toastify";
 import BookForm from "@/components/dashboard/BookForm";
 import getBook from "@/data/getBook";
+import getTokenServer from "@/data/getTokenServer";
 
 export default function EditBookPage() {
   const { id } = useParams();
@@ -32,11 +33,15 @@ export default function EditBookPage() {
   const handleSubmit = async (bookData) => {
     setSubmitting(true);
     try {
+      const token  = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(bookData),
         },
       );
