@@ -89,10 +89,14 @@ export default function ManageUsersPage() {
 
     setDeletingId(userId);
     try {
+      const token  = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${userId}`,
         {
           method: "DELETE",
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
         },
       );
       if (!res.ok) throw new Error();

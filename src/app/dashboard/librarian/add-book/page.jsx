@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import BookForm from "@/components/dashboard/BookForm";
+import getTokenServer from "@/data/getTokenServer";
 
 export default function AddBookPage() {
   const router = useRouter();
@@ -20,9 +21,13 @@ export default function AddBookPage() {
     setSubmitting(true);
     
     try {
+      const token  = await getTokenServer();
       const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/books`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           ...bookData,
           librarianId: session.user.id,
