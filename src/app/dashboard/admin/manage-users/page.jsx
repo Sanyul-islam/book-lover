@@ -6,6 +6,7 @@ import { Trash2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getAllUsers from "@/data/getAllUsers";
+import getTokenServer from "@/data/getTokenServer";
 
 const ROLE_COLORS = {
   admin: "danger",
@@ -49,11 +50,15 @@ export default function ManageUsersPage() {
   const changeRole = async (userId, newRole) => {
     setUpdatingId(userId);
     try {
+      const token  = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/users/${userId}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ role: newRole }),
         },
       );

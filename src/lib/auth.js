@@ -20,7 +20,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  
+  baseURL: process.env.BETTER_AUTH_URL,
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
@@ -34,7 +34,7 @@ export const auth = betterAuth({
       maxAge: 60 * 60 * 24 * 7, // 7 days
     },
   },
-  plugins: [jwt(),],
+  plugins: [jwt()],
   database: mongodbAdapter(db, {
     // Optional: if you don't provide a client, database transactions won't be enabled.
     client,
