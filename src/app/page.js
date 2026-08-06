@@ -12,7 +12,7 @@ import NavbarComponent from "@/components/UI/Navbar/Navbar";
 export default function Home() {
   return (
     <>
-    
+    <NavbarComponent/>
     <Carousel/>
     <FeaturedBooks/>
     <PopularCategories/>
@@ -20,7 +20,7 @@ export default function Home() {
     <ReadingBenefits/>
     <WhyChooseUs/>
     <Reviews/>
-    
+    <Footer/>
     </>
   );
 }
