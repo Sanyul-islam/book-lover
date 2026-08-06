@@ -6,6 +6,7 @@ import { Clock, PackageSearch, PackageCheck, ArrowRight } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getLibrarianDeliveries from "@/data/getLibrarianDeliveries";
+import getTokenServer from "@/data/getTokenServer";
 
 const STATUS_FLOW = {
   Pending: "Dispatched",
@@ -54,11 +55,15 @@ export default function ManageDeliveriesPage() {
 
     setUpdatingId(delivery._id);
     try {
+      const token  = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/deliveries/${delivery._id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ status: nextStatus }),
         },
       );
