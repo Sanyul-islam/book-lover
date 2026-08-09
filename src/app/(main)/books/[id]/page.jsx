@@ -22,6 +22,7 @@ import { toast } from "react-toastify";
 import getBook from "@/data/getBook";
 import getBookReviews from "@/data/getBookReviews";
 import checkPurchase from "@/data/checkPurchase";
+import getTokenServer from "@/data/getTokenServer";
 
 const STATUS_STYLES = {
   Available: { color: "success", label: "Available" },
@@ -207,9 +208,14 @@ export default function BookDetails() {
 
     setDeleting(true);
     try {
+      const token = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}`,
-        { method: "DELETE" },
+        { method: "DELETE" ,
+          headers: {
+            authorization: `Bearer ${token}`,
+          }
+        },
       );
       if (!res.ok) throw new Error();
 
@@ -225,18 +231,22 @@ export default function BookDetails() {
   const handleUnpublish = async () => {
     setUnpublishing(true);
     try {
+      const token = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ available: false, status: "Unpublished" }),
         },
       );
       if (!res.ok) throw new Error();
 
       toast.success("Book unpublished.");
-      fetchBook();
+      
     } catch (error) {
       console.error(error);
       toast.error("Failed to unpublish book.");

@@ -52,11 +52,15 @@ export default function ManageInventoryPage() {
 
     setUpdatingId(book._id);
     try {
+      const token = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${book._id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({
             status: newStatus,
             available: newStatus === "Published",

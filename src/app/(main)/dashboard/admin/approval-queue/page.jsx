@@ -6,6 +6,7 @@ import { Check, Trash2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getAllBooksAdmin from "@/data/getAllBooksAdmin";
+import getTokenServer from "@/data/getTokenServer";
 
 export default function ApprovalQueuePage() {
   const { data: session, isPending: sessionLoading } = authClient.useSession();
@@ -45,11 +46,14 @@ export default function ApprovalQueuePage() {
   const approveBook = async (bookId) => {
     setProcessingId(bookId);
     try {
+      const token = await getTokenServer();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/books/${bookId}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+           },
           body: JSON.stringify({ status: "Published", available: true }),
         },
       );
