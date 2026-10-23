@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import Link from "next/link";
 
 const MENU_ITEMS = [
   {
@@ -67,32 +68,22 @@ export default function AdminDashboardLayout({ children }) {
       <aside
         className={`md:w-64 shrink-0 ${isSidebarOpen ? "block" : "hidden"} md:block`}
       >
-        <div className="rounded-2xl border border-default-200 p-5 sticky top-24">
-          {/* Profile */}
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-default-100">
-            {session?.user?.image ? (
-              <div className="relative h-11 w-11 rounded-full overflow-hidden shrink-0">
-                <Image
-                  src={session.user.image}
-                  alt={session.user.name || "Profile"}
-                  fill
-                  sizes="44px"
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="h-11 w-11 rounded-full bg-default-100 flex items-center justify-center shrink-0">
-                <User size={18} className="text-default-400" />
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="font-semibold text-sm line-clamp-1">
-                {session?.user?.name || "Admin"}
-              </p>
-              <p className="text-xs text-default-500 line-clamp-1">
-                {session?.user?.email}
-              </p>
-            </div>
+        <div className="rounded-2xl border border-default-200 p-5 h-[calc(100vh-2rem)] fixed top-4">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              aria-label="Go to homepage"
+              className="flex items-center"
+            >
+              <Image
+                src="/navbar-logo.png"
+                alt="Book Lover"
+                width={180}
+                height={80}
+                className="h-auto w-auto mt-2"
+                priority
+              />
+            </Link>
           </div>
 
           {/* Menu */}

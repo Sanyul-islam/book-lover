@@ -140,7 +140,8 @@ export default function NavbarComponent() {
                     tabIndex={0}
                     className="cursor-pointer focus:outline-none"
                   >
-                    <Avatar className="ring-2 ring-blue-500 hover:opacity-80 transition-all">
+                    <Avatar className="ring-2 ring-blue-500 hover:opacity-80 
+                    transition-all">
                       <Avatar.Image
                         size="sm"
                         alt={session.user.name}

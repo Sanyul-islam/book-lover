@@ -20,6 +20,7 @@ import { authClient } from "@/lib/auth-client";
 import { toast } from "react-toastify";
 import getLibrarianBooks from "@/data/getLibrarianBooks";
 import getLibrarianDeliveries from "@/data/getLibrarianDeliveries";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
 const STATUS_PIE_COLORS = {
   "Pending Approval": "#f5a524",
@@ -127,7 +128,10 @@ export default function LibrarianDashboardOverview() {
   if (sessionLoading || loading) {
     return (
       <div className="space-y-8">
-        <Skeleton className="h-9 w-64 rounded-lg" />
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-9 w-64 rounded-lg" />
+          <Skeleton className="h-9 w-34 rounded-lg" />
+        </div>
         <div className="grid md:grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-2xl" />
@@ -143,14 +147,10 @@ export default function LibrarianDashboardOverview() {
 
   return (
     <div className="space-y-10">
-      <div>
-        <h1 className="text-3xl font-bold">
-          Welcome back{session?.user?.name ? `, ${session.user.name}` : ""}
-        </h1>
-        <p className="text-default-500 mt-1">
-          Here&apos;s how your listed books are performing.
-        </p>
-      </div>
+      <DashboardHeader
+        title={`Welcome back${session?.user?.name ? `, ${session.user.name}` : ""}`}
+        subtitle="A platform-wide look at users, books, and revenue."
+      />
 
       {/* Quick Stats */}
       <div className="grid md:grid-cols-3 gap-5 text-center">
