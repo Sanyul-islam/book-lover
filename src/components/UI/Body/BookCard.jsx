@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Card, Button, Chip } from "@heroui/react";
+import { Card, Button, Chip, CardContent } from "@heroui/react";
 import { motion } from "motion/react";
 
 export default function BookCard({ book }) {
@@ -36,31 +36,27 @@ export default function BookCard({ book }) {
           </div>
         </div>
       </Card.Content>
+      <Card.Content className="flex flex-col justify-center align-middle text-center h-full gap-2">
+        <Card.Header className="px-5 pt-3">
+          <Card.Title className="line-clamp-1 text-xl">{title}</Card.Title>
 
-      <Card.Header className="px-5 pt-3">
-        <Card.Title className="line-clamp-1 text-xl">{title}</Card.Title>
+          <Card.Description>By {author}</Card.Description>
+        </Card.Header>
 
-        <Card.Description>By {author}</Card.Description>
-      </Card.Header>
+        <Card.Content className="px-5">
+          {price && <p className="font-bold text-lg">${price}</p>}
+        </Card.Content>
 
-      <Card.Content className="px-5">
-        {price && <p className="font-bold text-lg">${price}</p>}
+        <Card.Footer className="px-5 pb-5 justify-center align-middle text-center">
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.8 }}>
+            <Link href={`/books/${_id}`}>
+              <Button color="primary" className="w-full">
+                View Details
+              </Button>
+            </Link>
+          </motion.div>
+        </Card.Footer>
       </Card.Content>
-
-      <Card.Footer className="px-5 pb-5">
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.8 }}>
-        <Link
-          href={`/books/${_id}`}
-        >
-        <Button
-          color="primary"
-          className="w-full"
-        >
-          View Details
-        </Button>
-        </Link>
-        </motion.div>
-      </Card.Footer>
     </Card>
   );
 }

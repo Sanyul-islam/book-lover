@@ -61,7 +61,7 @@ const categories = [
 
 export default function PopularCategories() {
   return (
-    <section className="max-w-7xl mx-auto px-4 py-16">
+    <section className="container mx-auto px-4 py-16">
       {/* Heading */}
       <div className="text-center mb-10">
         <Chip
@@ -80,8 +80,10 @@ export default function PopularCategories() {
           Explore books from your favorite genres.
         </p>
       </div>
-      <CategoryRow items={categories} />
-      <CategoryRow items={categories} reverse />
+      <div className="w-11/12 mx-auto">
+        <CategoryRow items={categories} />
+        <CategoryRow items={categories} reverse />
+      </div>
     </section>
   );
 }

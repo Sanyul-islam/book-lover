@@ -76,9 +76,7 @@ export default function Reviews() {
       >
         {reviews.map((item) => (
           <div key={item.name} className="grid grid-rows-1 gap-6 mx-5">
-            <Card
-              className="p-6 border border-default-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300"
-            >
+            <Card className="p-6 border border-default-200 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
               {/* User */}
               <div className="flex items-center gap-4 mb-5 pb-5 border-b border-default-200">
                 <Avatar>

@@ -145,7 +145,7 @@ export default function AdminDashboardOverview() {
         subtitle="A platform-wide look at users, books, and revenue."
       />
       {/* Quick Stats */}
-      <div className="grid md:grid-cols-4 gap-5">
+      <div className="grid md:grid-cols-4 gap-5 text-center">
         <StatCard
           icon={Users}
           label="Total Users"

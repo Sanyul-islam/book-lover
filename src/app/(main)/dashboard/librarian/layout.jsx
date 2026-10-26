@@ -3,117 +3,168 @@
 import { useState } from "react";
 import Image from "next/image";
 import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  PlusCircle,
-  Library,
   Truck,
-  User,
+  BookMarked,
+  Star,
   Menu,
   X,
 } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
-import Link from "next/link";
 
 const MENU_ITEMS = [
   {
     label: "Overview",
-    href: "/dashboard/librarian",
+    href: "/dashboard/user",
     icon: LayoutDashboard,
     exact: true,
   },
   {
-    label: "Add Book",
-    href: "/dashboard/librarian/add-book",
-    icon: PlusCircle,
-  },
-  {
-    label: "Manage Inventory",
-    href: "/dashboard/librarian/manage-inventory",
-    icon: Library,
-  },
-  {
-    label: "Manage Deliveries",
-    href: "/dashboard/librarian/manage-deliveries",
+    label: "Delivery History",
+    href: "/dashboard/user/delivery-history",
     icon: Truck,
+  },
+  {
+    label: "My Reading List",
+    href: "/dashboard/user/reading-list",
+    icon: BookMarked,
+  },
+  {
+    label: "My Reviews",
+    href: "/dashboard/user/reviews",
+    icon: Star,
   },
 ];
 
-export default function LibrarianDashboardLayout({ children }) {
+export default function UserDashboardLayout({ children }) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  if (!isPending && !session) {
-    router.push("/login");
-    return null;
-  }
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-      {/* Mobile toggle */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="md:hidden inline-flex items-center gap-2 text-sm font-medium text-default-600 border border-default-200 rounded-md px-3 py-2 self-start"
-      >
-        {isSidebarOpen ? <X size={16} /> : <Menu size={16} />}
-        Menu
-      </button>
+    <div className="min-h-dvh bg-background">
+      {/* Mobile Header */}
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-default-200 bg-background px-4 py-3 md:hidden">
+        <NextLink href="/" aria-label="Go to homepage">
+          <Image
+            src="/navbar-logo.png"
+            alt="Book Lover"
+            width={140}
+            height={50}
+            priority
+            className="h-auto w-auto max-w-35"
+          />
+        </NextLink>
+
+        <button
+          type="button"
+          onClick={() => setIsSidebarOpen((prev) => !prev)}
+          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isSidebarOpen}
+          aria-controls="user-dashboard-sidebar"
+          className="inline-flex items-center justify-center rounded-lg border border-default-200 p-2 text-default-600 transition hover:bg-default-100"
+        >
+          {isSidebarOpen ? <X size={21} /> : <Menu size={21} />}
+        </button>
+      </header>
+
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          onClick={closeSidebar}
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+        />
+      )}
 
       {/* Sidebar */}
       <aside
-        className={`md:w-64 shrink-0 ${isSidebarOpen ? "block" : "hidden"} md:block`}
+        id="user-dashboard-sidebar"
+        className={`
+          fixed inset-y-0 left-0 z-50
+          flex h-dvh w-72 max-w-[85vw] flex-col
+          overflow-y-auto border-r border-default-200
+          bg-background p-4
+          transition-transform duration-200 ease-in-out
+          md:w-64 md:max-w-none
+          ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full md:translate-x-0"
+          }
+        `}
       >
-        <div className="rounded-2xl border border-default-200 p-5 h-[calc(100vh-2rem)] fixed top-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              aria-label="Go to homepage"
-              className="flex items-center"
-            >
-              <Image
-                src="/navbar-logo.png"
-                alt="Book Lover"
-                width={180}
-                height={80}
-                className="h-auto w-auto mt-2"
-                priority
-              />
-            </Link>
-          </div>
+        {/* Desktop Logo */}
+        <div className="mb-8 hidden px-2 pt-2 md:block">
+          <NextLink href="/" aria-label="Go to homepage">
+            <Image
+              src="/navbar-logo.png"
+              alt="Book Lover"
+              width={170}
+              height={65}
+              priority
+              className="h-auto w-auto max-w-full"
+            />
+          </NextLink>
+        </div>
 
-          {/* Menu */}
-          <nav className="space-y-1">
-            {MENU_ITEMS.map((item) => {
-              const isActive = item.exact
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
-              const Icon = item.icon;
+        {/* Mobile Sidebar Header */}
+        <div className="mb-6 flex items-center justify-between md:hidden">
+          <span className="text-lg font-semibold">User Dashboard</span>
 
-              return (
-                <NextLink
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition ${
+          <button
+            type="button"
+            onClick={closeSidebar}
+            aria-label="Close menu"
+            className="rounded-lg p-2 text-default-600 transition hover:bg-default-100"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav
+          aria-label="User dashboard navigation"
+          className="flex-1 space-y-1"
+        >
+          {MENU_ITEMS.map((item) => {
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+
+            const Icon = item.icon;
+
+            return (
+              <NextLink
+                key={item.href}
+                href={item.href}
+                onClick={closeSidebar}
+                aria-current={isActive ? "page" : undefined}
+                className={`
+                  flex items-center gap-3 rounded-lg px-3 py-3
+                  text-sm font-medium transition-colors
+                  ${
                     isActive
                       ? "bg-primary/10 text-primary"
                       : "text-default-600 hover:bg-default-100 hover:text-primary"
-                  }`}
-                >
-                  <Icon size={16} />
-                  {item.label}
-                </NextLink>
-              );
-            })}
-          </nav>
-        </div>
+                  }
+                `}
+              >
+                <Icon size={18} className="shrink-0" />
+                <span>{item.label}</span>
+              </NextLink>
+            );
+          })}
+        </nav>
       </aside>
 
-      {/* Content */}
-      <main className="flex-1 min-w-0">{children}</main>
+      {/* Main Content */}
+      <main className="min-w-0 p-4 sm:p-6 md:ml-64 md:p-8">{children}</main>
     </div>
   );
 }
